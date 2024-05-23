@@ -1,15 +1,17 @@
-from logging import getLogger
 from scapy.all import *
 from scapy.layers.inet import IP, TCP, ICMP
 from tabulate import tabulate
 
 
-print("--------------SCAPY PORT SCANNER------")
-print("""\
-     Press 1: Scan a Specific IP Address with a Specific Port
-     Press 2: Scan an IP Address with a Port Range
-     Press 3: Scan a Network for Open Ports within a Port Range""")
-print("--------------------")
+print("-------------- SCAPY PORT SCANNER --------------")
+print("""
+     Select an Option:
+     
+     1. Scan a Specific IP Address with a Specific Port
+     2. Scan an IP Address with a Range of Ports
+     """)
+print("------------------------------------------------")
+
 
 def is_ip_reachable(ip):
     icmp_packet = IP(dst=ip)/ICMP()
@@ -25,7 +27,7 @@ def sendRequest():
        ipaddress=input("Enter Target IP Address")
        if is_ip_reachable(ipaddress):
           userinput3=int(input("Enter Target Port Number"))
-          return sendPacket(ipaddress,userinput3)
+          return open_port(ipaddress,userinput3)
        else:
            print("IP IS Not Reachable")
            return False
@@ -41,7 +43,7 @@ def sendRequest():
     else:
        return False
 
-def sendPacket(ipaddress, port):
+def open_port(ipaddress, port):
     port_status={}
     pkt = sr1(IP(dst=ipaddress)/TCP(dport=port, flags="S"), timeout=4, verbose=0)
     if pkt and pkt.haslayer(TCP):
@@ -56,7 +58,7 @@ def sendPacket(ipaddress, port):
 
 def list_open_ports(ip,minport,maxport):
     port_status = {}
-    for port in range(minport, maxport):
+    for port in range(minport, maxport+1):
         pkt = sr1(IP(dst=ip)/TCP(dport=port, flags="S"), timeout=4, verbose=0)
         if pkt and pkt.haslayer(TCP):
             tcp_layer = pkt.getlayer(TCP)
@@ -72,5 +74,5 @@ def list_open_ports(ip,minport,maxport):
 datalist=sendRequest()
 data = [[port, status] for port, status in datalist.items()]
 
-print(tabulate(data,headers=["Port","Status"], tablefmt="plain"))
+print(tabulate(data,headers=["Port","Status"], tablefmt="orgtbl"))
 
